@@ -1,0 +1,2 @@
+webpackJsonp([38],{OsW8:function(e,n,t){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var l=function(){var e=this,n=e.$createElement;return(e._self._c||n)("div",[e._v("性格职业测试")])},r=[],u={render:l,staticRenderFns:r},s=u,c=t("VU/8"),a=c(null,s,!1,null,null,null);n.default=a.exports}});
+//# sourceMappingURL=38.e2ec6aa4b2d74a20ec7f.js.map

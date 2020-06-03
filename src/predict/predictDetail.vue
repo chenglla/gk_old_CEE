@@ -1,0 +1,741 @@
+<template>
+  <div style="height: 100%;width: 100%;display:flex;flex-direction: column;">
+    <div class="zyyc_info">
+      <div class="predict_header">
+        <div class="return__icon" @click="gotoPage('record')" style="float: left;margin-right: 10px;">
+          <i class="iconfont iconleft-arrow"></i>
+        </div>
+        <i class="iconfont iconlocation"></i>
+        <span>{{province}}</span>
+        <span>{{category}}</span>
+        <div @click="gotoRecord()" style="right: 10px;position: absolute;top: 5px;padding: 4px 0;color: #fff;">
+          <i class="iconfont iconshizhong"></i>
+          <i class="iconfont icondian"></i>
+        </div>
+        <img src="../assets/img/zt.png" alt="" class="zyyc_left">
+        <img src="../assets/img/yt.png" alt="" class="zyyc_right">
+      </div>
+      <div class="predict_second">
+        <div>
+          <label>
+            <input type="text" class="predict_score" :value="score" maxlength="3" @click="toggleInput" ref="scoreInput">
+          </label>
+        </div>
+        <p class="predict_second_tip">我的高考成绩</p>
+      </div>
+      <div class="predict_third">
+        <div class="predict_third_left"><span>批次：</span>{{batch}}</div>
+        <div class="predict_third_right"><span>省市排名：</span>
+          <span v-if="score === ''">--</span>
+          <input v-else type="text" oninput = "value=value.replace(/[^\d]/g,'')" :value="rank" class="predict_paiming">名
+        </div>
+      </div>
+    </div>
+
+<!--    <div class="predict__score">-->
+<!--      <i class="iconfont iconfenshu-"></i>-->
+<!--      <div class="predict__score-label">你的高考成绩为</div>-->
+<!--      <div class="predict_userinfo">-->
+<!--        <p class="predict_content" >{{province}}</p>-->
+<!--        <p class="predict_content" >{{category}}</p>-->
+<!--        <p class="predict_content" >{{batch}}</p>-->
+<!--      </div>-->
+<!--      <div class="predict__score-input">-->
+<!--        <input type="text" maxlength="3" @click="toggleInput" ref="scoreInput" :value="score" disabled style="background-color: #FFFFFF">-->
+<!--      </div>-->
+<!--      <div class="predict__rank-input">-->
+<!--        <input type="text" :value="rank" @click="rankInput" disabled ref="rankInput" style="background-color: #FFFFFF">-->
+<!--      </div>-->
+<!--      <div class="predit_button">-->
+<!--        <div class="predict__score-btn" @click="startSchoolPredict">主学校预测</div>-->
+<!--        <div class="predict__score-btn" @click="startMajorPredict">主专业预测</div>-->
+<!--      </div>-->
+<!--    </div>-->
+    <div class="predict__result">
+      <div class="predict__tab">
+        <ul>
+          <li class="predict__tab-item" :class="{'active': curTab === 'bao'}" @click="changTab('bao')">保底学校</li>
+          <li class="predict__tab-item" :class="{'active': curTab === 'wen'}" @click="changTab('wen')">稳妥学校</li>
+          <li class="predict__tab-item" :class="{'active': curTab === 'tiao'}" @click="changTab('tiao')">挑战学校</li>
+        </ul>
+      </div>
+      <div class="predict__list" ref="schoolWrapper">
+        <div class="school-list" ref="schoolList">
+          <div class="list-loading" v-if="loading">
+            <div class="loader"></div>
+          </div>
+          <div class="list-no-data" v-if="!loading && list.length === 0">
+            <template v-if="!loaded">请输入预测录取分数</template>
+            <template v-else-if="loaded">无结果，请核实您的分数和批次</template>
+          </div>
+          <div class="school-item" v-if="!loading && list.length !== 0" v-for="school in list" @click="gotoDetailPage(school)">
+            <div class="school-item__logo"><img :src="school.logo"></div>
+            <div class="school-item__devide"></div>
+            <div class="school-item__info">
+              <div class="school-item__name">
+                {{school.schoolname}}
+                <!--                <span v-for="(item, index) in labelList" :key="index">{{item}}</span>-->
+                <span v-if="school.f211 === 1">211</span>
+                <span v-if="school.f985 === 1">985</span>
+              </div>
+              <div class="school-item_rank">
+                <div class="school-item_rank_left">
+                  名次:
+                  <span v-if="school.addpaiming > 0">+{{school.addpaiming}}</span>
+                  <span v-else>{{school.addpaiming}}</span>
+                </div>
+                <div class="school-item_rank_right">
+                  {{school.paiming}}名
+                  <div>19年最低位次</div>
+                </div>
+              </div>
+              <div class="school-item_rank">
+                <div class="school-item_rank_left">
+                  扩招:
+                  <span>{{school.addenrol}}人</span>
+                </div>
+                <div class="school-item_rank_right">
+                  <div>19年招生：<span>{{school.enrolment}}人</span></div>
+                  <div>20年招生：<span>{{school.nowenrolment}}人</span></div>
+                  <div @click.stop="gotoMajorPlan(school.schoolname)">查看详情>></div>
+                </div>
+              </div>
+              <div class="school-item_score">
+                我的分数: <span>+{{score-school.min}}</span>分，19年最低分数: <span>{{school.min}}</span>分。
+              </div>
+<!--              <div class="school-item__name">{{school.schoolname}}</div>-->
+<!--              <div class="school-item__ranking">推荐批次: {{school.batch}}</div>-->
+<!--&lt;!&ndash;              <div class="school-item__ranking">推荐批次: 本科提前批</div>&ndash;&gt;-->
+<!--              <div class="school-item__grade">{{school.grade}}</div>-->
+<!--&lt;!&ndash;              <div class="school-item__prescore">建议报考分: {{school.prescore}}</div>&ndash;&gt;-->
+<!--&lt;!&ndash;              <div class="school-item__name">{{school.schoolname}}</div>&ndash;&gt;-->
+<!--&lt;!&ndash;              <div class="school-item__ranking">推荐批次: {{school.batch}}</div>&ndash;&gt;-->
+<!--&lt;!&ndash;              <div class="school-item__grade">{{school.grade}}</div>&ndash;&gt;-->
+
+<!--              &lt;!&ndash;              <div class="school-item__ranking">推荐批次: 本科提前批</div>&ndash;&gt;-->
+<!--              <div class="school-item__prescore" @click.stop="gotoMajorPlan">专业招生计划 ></div>-->
+<!--              <div class="school-item__prescore">19年最低分和位次: {{school.prescore}}</div>-->
+<!--              <div class="school-item__prescore">对比9年位次: {{school.prescore}}</div>-->
+            </div>
+          </div>
+          <div class="school-item-end" v-if="!loading && list.length !== 0 && end">到底了</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import { findOrderInfo, getSchoolInfo } from '@/api/index'
+  import { errorMsg } from '@/utils/common'
+  import BScroll from 'better-scroll'
+  export default {
+    data () {
+      return {
+        curTab: 'bao',
+        loading: false,
+        list: [],
+        wenList: [],
+        tiaoList: [],
+        baoList: [],
+        end: false,
+        schoolScroll: null,
+        loaded: false,
+        agreeDiag: '',
+        noview: false, // 蒙层
+        count: '',
+        rank: '50034'
+      }
+    },
+    computed: {
+      openid () {
+        return this.$store.state.user.openid
+      },
+      province () {
+        return this.$route.query.province
+      },
+      category () {
+        return this.$route.query.category
+      },
+      batch () {
+        return this.$route.query.batch
+      },
+      score () {
+        return this.$route.query.score
+      }
+    },
+    mounted () {
+      this.getList()
+    },
+    methods: {
+      gotoRecord () {
+        this.$router.push({ path: '/record' })
+      },
+      toggleInput () {
+        this.$refs.scoreInput.focus()
+        const a = document.querySelector('.predict_score')
+        // a.value = this.score + '分'
+        a.removeAttribute('placeholder')
+        a.parentNode.className = 'predict_second_input'
+        console.log(a)
+      },
+      rankInput () {
+        this.$refs.rankInput.focus()
+      },
+      startSchoolPredict () {
+        this.getList()
+      },
+      startMajorPredict () {
+        this.getList()
+      },
+      gotoMajorPlan (val) {
+        console.log('跳转到专业招生计划')
+        this.$router.push({
+          name: 'majorPlan',
+          query: {
+            schoolName: val
+          }
+        })
+      },
+      gotoDetailPage (school) {
+        getSchoolInfo(school.schoolcode, this.openid).then(res => {
+          this.code = school.schoolcode
+          this.loading = false
+          if (res.data.code === 505) {
+            this.show = true
+          } else if (res.data.code === 0) {
+            this.$router.push({ path: '/schoolInfo/' + this.openid + '/' + school.schoolcode })
+          } else {
+          }
+        })
+      },
+      gotoPage (name) {
+        this.$router.push({ name: name })
+      },
+      changTab (i) {
+        this.curTab = i
+        this.list = this[i + 'List']
+      },
+      getList () {
+        if (this.score === '') {
+          return
+        }
+        this.loading = true
+        findOrderInfo({
+          province: this.province,
+          category: this.category,
+          score: this.score,
+          openid: this.openid
+        }).then(res => {
+          this.loaded = true
+          this.loading = false
+          this.list = []
+          if (res.data.code !== 0) {
+            errorMsg(this, res.data.msg)
+            this.loaded = false
+          } else {
+            this.noview = !res.data.data.istrue
+            this.wenList = res.data.data.wentuo || []
+            this.tiaoList = res.data.data.chongci || []
+            this.baoList = res.data.data.baodi || []
+            console.log('444444', this.baoList)
+            this.list = this.baoList
+            if (this.list.length !== 0) {
+              this.end = true
+            } else {
+              this.end = false
+            }
+          }
+          this.init()
+        })
+      },
+      init () {
+        this.$nextTick(() => {
+          this.schoolScroll = new BScroll(this.$refs.schoolWrapper, {
+            click: true
+          })
+        })
+      }
+    }
+  }
+</script>
+<style lang="scss" scoped>
+  .zyyc_info {
+    background: url("../assets/img/zyyc.png") no-repeat;
+    .predict_header {
+      padding-top: 10px;
+      margin: 0 5px 5px 15px;
+      color: #fff;
+      .iconfont {
+        font-size: 14px;
+        /*margin-right: -4px;*/
+      }
+      .zyyc_left, .zyyc_right {
+        position: absolute;
+      }
+      .zyyc_right {
+        top: 35px;
+        right: 0;
+        width: 35px;
+      }
+      .zyyc_left {
+        top: 105px;
+        left: 0;
+        width: 50px;
+      }
+    }
+    input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.1em;
+      font-size: 20px;
+      font-family: 宋体,serif;
+    }
+    .predict_second {
+      margin-top: 10px;
+      text-align: center;
+      position: relative;
+      .predict_second_input:after {
+        content: '分';
+        position: absolute;
+        color: #fff;
+        left: 210px;
+      }
+      .predict_score {
+        outline: 0;
+        background-color: transparent;
+        border: 0;
+        font-size: 20px;
+        text-align: center;
+        /*color: rgba(255, 255, 255, 0.5);*/
+        color: #fff;
+        font-family: 宋体,serif;
+      }
+      .predict_second_tip {
+        color: #fff;
+        margin-top: 3px;
+      }
+    }
+    .predict_third {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      text-align: center;
+      .predict_third_left,
+      .predict_third_right {
+        display: inline-block;
+        padding: 0 20px;
+        color: #fff;
+        span:first-child {
+          color: rgba(255, 255, 255, 0.5);
+        }
+        .predict_paiming {
+          /*display: none;*/
+          outline: 0;
+          background-color: transparent;
+          border: 0;
+          width: 48px;
+          color: #fff;
+          margin-left: -8px;
+          /*padding: 0 2px;*/
+          /*font-family: 宋体,serif;*/
+        }
+      }
+    }
+    .predict_four {
+      /*width: 100%;*/
+      margin: 15px 0 50px;
+      text-align: center;
+      /*color: #fff;*/
+      .predict_four_button {
+        background: #fff;
+        padding: 6px 35px;
+        /*text-align: center;*/
+        /*background: #fff;*/
+        color: rgb(0, 115, 231);
+        /*width: 120px;*/
+        border-radius: 15px;
+        /*padding: 4px 10px;*/
+      }
+    }
+  }
+  .predict__score {
+    flex: none;
+    position: relative;
+    overflow: hidden;
+    margin: 20px;
+    padding: 10px 10px 20px 10px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 6px 6px rgba(75, 92, 178, 0.1);
+    i.iconfont {
+      position: absolute;
+      font-size: 140px;
+      top: -80px;
+      right: -40px;
+      color: rgba(112, 135, 250, .1);
+    }
+  }
+  .predict__score-input {
+    width: 80px;
+    margin: 0 auto 10px 30%;
+    display: block;
+    position: relative;
+    input {
+      border: 0;
+      border-bottom: 2px solid #4859ad;
+      font-size: 24px;
+      color: #4cb710;
+      width: 100%;
+      text-align: center;
+    }
+    &:after {
+      content: '分';
+      position: absolute;
+      top: 13px;
+      right: -25px;
+    }
+  }
+  /*.predict__score-input {
+    width: 80px;
+    margin: 10px auto 20px 30%;
+    display: block;
+    position: relative;
+    input {
+      border: 0;
+      border-bottom: 2px solid #4859ad;
+      font-size: 30px;
+      color: #4cb710;
+      width: 100%;
+      text-align: center;
+    }
+    &:after {
+      content: '分';
+      position: absolute;
+      top: 18px;
+      right: -30px;
+    }
+  }*/
+  .predict__rank-input {
+    width: 80px;
+    margin: 15px auto 20px 30%;
+    display: block;
+    position: relative;
+    input {
+      border: 0;
+      border-bottom: 2px solid #4859ad;
+      font-size: 24px;
+      color: #4cb710;
+      width: 100%;
+      text-align: center;
+    }
+    &:after {
+      content: '名';
+      position: absolute;
+      top: 12px;
+      right: -25px;
+    }
+    &:before {
+      content: '省市排名:';
+      position: absolute;
+      top: 12px;
+      left: -70px;
+    }
+  }
+  .predit_button {
+    text-align: center;
+    .predict__score-btn {
+      background: #4859ad;
+      color: #fff;
+      width: 100px;
+      font-size: 13px;
+      margin: 10px 10px 0;
+      text-align: center;
+      border-radius: 4px;
+      padding: 6px 10px;
+      display: inline-block;
+    }
+  }
+  .predict__tab {
+    text-align: center;
+    font-size: 0;
+    height: 28px;
+  }
+  .predict__tab-item {
+    display: inline-block;
+    color: #8a8a8a;
+    position: relative;
+    width: 80px;
+    text-align: center;
+    padding-bottom: 6px;
+    font-size: 14px;
+    &.active {
+      font-weight: bold;
+      color: #4859ad;
+      &:after {
+        content: '';
+        width: 40px;
+        height: 2px;
+        background: #4859ad;
+        position: absolute;
+        left: 20px;
+        bottom: 0;
+      }
+    }
+  }
+  .predict__result {
+    margin-top: 10px;
+    flex: 0;
+    height: calc(100% - 73px);
+    position: relative;
+  }
+  .predict__list {
+    height: calc(100% - 30px);
+    overflow: hidden;
+    background: #fff;
+    position: relative;
+    /*&.noview {*/
+    /*  filter: blur(16px);*/
+    /*}*/
+  }
+  .school-list {
+    padding-bottom: 70px;
+  }
+  .school-item {
+    /*-webkit-filter:blur(16px);*/
+    /*<!--filter: not(first-child);-->*/
+    box-shadow: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    margin-right: 0;
+    .noview & + & {
+      &:not(first-child) {filter: blur(16px);}
+      border-top: 1px solid #f9f9f9;
+    }
+  }
+  .school-item__logo {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    top: 0;
+    right: -13px;
+    opacity: .4;
+    margin-top: -13px;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .school-item__info {
+    padding-left: 0;
+    position: relative;
+  }
+  /*.school-item__devide {*/
+  /*  position: absolute;*/
+  /*  left: 75px;*/
+  /*  content: '';*/
+  /*  width: 1px;*/
+  /*  height: calc(100% - 20px);*/
+  /*  background: #4859ad12;*/
+  /*  display: block;*/
+  /*}*/
+  .school-item__name {
+    font-size: 15px;
+    color: #000;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ececec;
+    span {
+      font-size: 12px;
+      border: 1px solid rgb(26, 134, 241);
+      padding: 1px 3px;
+      margin-left: 15px;
+      color: rgb(26, 134, 241);
+      border-radius: 4px;
+      letter-spacing: 0;
+    }
+    span:first-child {
+      margin-left: 3px;
+    }
+  }
+  .school-item_rank {
+    /*letter-spacing: 0;*/
+    margin-top: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ececec;
+    position: relative;
+    .school-item_rank_left, .school-item_rank_right {
+      display: inline-block;
+      width: 46%;
+      /*position: absolute;*/
+    }
+    .school-item_rank_left {
+      /*float: left;*/
+      vertical-align: 50%;
+      /*vertical-align: text-top;*/
+      margin-top: -10px;
+      font-weight: bolder;
+      color: #000;
+      font-size: 17px;
+      border-right: 1px solid #ececec;
+      span {
+        color: rgb(255, 158, 0);
+      }
+    }
+    .school-item_rank_right {
+      /*float: left;*/
+      /*border-left: 1px solid #ececec;*/
+      /*border-left-width: 15px;*/
+      padding-left: 15px;
+      color: #000;
+      div {
+        font-size: 12px;
+        color: #9c9c9c;
+        span {
+          color: #000;
+        }
+      }
+      div:nth-child(3) {
+        margin-top: 3px;
+        color: rgb(0, 115, 231);
+      }
+    }
+  }
+  .school-item_score {
+    color: #000;
+    margin-top: 5px;
+    font-size: 13px;
+  }
+  /*.school-item__grade,*/
+  /*.school-item__ranking,*/
+  /*.school-item__prescore {*/
+  /*  display: inline-block;*/
+  /*  color: #fff;*/
+  /*  border: 1px solid silver;*/
+  /*  margin: 4px 4px 4px 0;*/
+  /*  padding: 2px 8px;*/
+  /*  border-radius: 4px;*/
+  /*  font-size: 12px;*/
+  /*  background: #5f95dc;*/
+
+  /*}*/
+  .school-item-end {
+    padding-bottom: 30px;
+  }
+  /*.school-item__ranking{*/
+  /*  display: inline-block;*/
+  /*  color: #fff;*/
+  /*  border: 1px solid silver;*/
+  /*  margin: 4px 4px 4px 0;*/
+  /*  padding: 2px 8px;*/
+  /*  border-radius: 4px;*/
+  /*  font-size: 12px;*/
+  /*  background: #5f95dc;*/
+  /*}*/
+
+  .school-item__devide {
+    display: none;
+  }
+  .predict__tips {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .predict__tips__overlay {
+    background: rgba(0, 0, 0, .3);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+  }
+  .predict__tips__content {
+    width: 200px;
+    background: rgba(255, 255, 255, 0.9);
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    margin-left: -120px;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  .tips__header {
+    margin-bottom: 10px;
+  }
+  .tips__body {
+    font-size: 13px;
+    p {
+      margin-bottom: 10px;
+      text-align: justify;
+    }
+  }
+  .tips_footer {
+    text-align: right;
+  }
+  .tips__btn {
+    display: inline-block;
+    background: #4859ad;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .predict__pay {
+    position: absolute;
+    line-height: 80px;
+    text-align: center;
+    font-size: 14px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9;
+    &:before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 9;
+      left: 0;
+      top: 0;
+    }
+    .iconfont {
+      margin-right: 10px;
+    }
+    .predict__paytext {
+      position: absolute;
+      width: 140px;
+      top: 130px;
+      left: 50%;
+      color: #848484;
+      z-index: 10;
+      margin-left: -70px;
+      .iconfont {
+        border: 1px solid #4859ad;
+        border-radius: 40px;
+        width: 40px;
+        height: 40px;
+        display: block;
+        line-height: 40px;
+        color: #485aad;
+        font-size: 20px;
+        margin: auto;
+      }
+    }
+    .pay-tips {
+      display: block;
+      line-height: 1;
+      margin-top: 20px;
+      color: #4859ad;
+    }
+  }
+  .predict_userinfo {
+    position: absolute;
+    right: 10px;
+    top: 4px;
+  }
+  .predict_content{
+    border: 1px dashed #acd6ff;
+    border-radius: 3px;
+    text-align: center;
+    background-color: #f0f0f0;
+    margin: 6px 0;
+    padding: 3px 5px;
+  }
+</style>

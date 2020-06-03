@@ -1,0 +1,121 @@
+@import "./color.scss";
+body{
+  .vux-search-box.vux-search-fixed {
+    position: relative !important;
+  }
+  .weui-search-bar {
+    background: #efeff4;
+    padding: 10px 20px;
+    height: 40px;
+    &:before,
+    &:after {
+      display: none;
+    }
+  }
+  .weui-search-bar__form {
+    &:after {
+      border-radius: 50px;
+    }
+  }
+  .weui-search-bar__label {
+    border-radius: 20px;
+    top: 4px;
+  }
+  .weui-search-bar__cancel-btn {
+    color: #777;
+  }
+  .return-box .weui-search-bar__cancel-btn {
+    color: #fff;
+  }
+  .weui-search-bar__box {
+    .weui-icon-search {
+      top: 15px;
+      left: 8px;    
+    }
+    .weui-icon-clear {
+      margin-top: 0;
+    }
+  }
+  .return-box {
+    position: relative;
+    .return__icon {
+      position: absolute;
+      left: 10px;
+      top: 6px;
+      z-index: 9;
+      padding: 8px 6px;
+      color: #fff;
+      .iconfont {
+        font-size: 18px;
+        color: #fff;
+      }
+    }
+    .vux-search-box {
+      padding-left: 30px; 
+      padding-top: 6px;
+      padding-bottom: 10px;   
+      width: calc(100% - 30px);
+      background: transparent;
+      backdrop-filter: none;
+    }
+    .weui-search-bar,
+    .weui-search-bar__form {
+      background: transparent;
+    }
+  }
+  .weui-cell {
+    &,
+    &.vux-datetime {
+      font-size: 13px;
+      color: #767c98;
+    }
+    &.vux-x-switch.weui-cell_switch {
+      padding: 10px 15px;
+    }
+    .weui-switch, .weui-switch-cp__box {
+      height: 22px;
+      width: 38px;
+      &:before,
+      &:after {
+        width: 20px;
+        height: 20px;
+      }
+      &:checked:after {
+        transform: translateX(16px);
+      }
+    }
+  }
+  .weui-btn {
+    font-size: 13px;
+  }
+  .weui-btn_primary {
+    background: RGB(52,127,245);
+  }
+  .vux-cell-value {
+    color: #767c98;
+  }
+  .weui-dialog {
+    left: 0;
+    -webkit-transform: none;
+    transform: none;
+  }
+  .weui-dialog__ft {
+    font-size: 13px;
+    line-height: 36px;
+  }
+  .vux-popup-header-right {
+    color: #00a0dc;
+  }
+  .vux-confirm .weui-dialog .weui-dialog__bd {
+    text-align: left;
+  }
+}
+.weui-dialog__title {
+  font-size: 16px;
+}
+.weui-dialog__btn_primary {
+  color: #00a0dc;
+}
+.vux-prompt-msgbox {
+  font-size: 14px;
+}

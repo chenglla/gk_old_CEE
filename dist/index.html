@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset=utf-8><title>高考预测</title><meta http-equiv=Cache-Control content="no-cache, no-store, must-revalidate"><meta http-equiv=Pragma content=no-cache><meta http-equiv=Expires content=0><meta name=viewport content="width=device-width,initial-scale=1,user-scalable=0"><link rel=stylesheet href=//res.wx.qq.com/open/libs/weui/1.1.3/weui.min.css><link rel=stylesheet type=text/css href=//at.alicdn.com/t/font_1154025_0jt6qsgct9fk.css><script type=text/javascript src=http://res.wx.qq.com/open/js/jweixin-1.4.0.js></script><title></title><link href=../css/app.54bcfcf71cc71a601ff4e0d46b767a29.css rel=stylesheet></head><body><div id=app-box></div><script type=text/javascript>// if (location.search.indexOf('openid') !== -1) {
+      //   const openid = location.search.split('openid=')[1]
+      //   localStorage.setItem('openid', openid)
+      // }
+      // if (location.search.indexOf('groupid') !== -1) {
+      //   const groupid = location.search.split('groupid=')[1]
+      //   localStorage.setItem('groupid', groupid)
+      // }
+      // if (location.hash === '') {
+      //   location.href = location.origin + location.pathname + '/#/home'
+      // }
+      if (location.href.split('openid').length === 2) {
+        const arr = location.href.split(/[\?\&]/);
+        const obj = {}
+        arr.map(item => {
+          if (item.indexOf('=') !== -1) {
+            obj[item.split('=')[0]] = item.split('=')[1]
+          } else {
+            obj.baseUrl = item
+          }
+        })
+        localStorage.setItem('openid', obj.openid)
+        localStorage.setItem('groupid', obj.groupId)
+        if (location.hash === '') {
+          location.href = location.origin + location.pathname + '/#/home'
+        }
+      }</script><script type=text/javascript src=../js/manifest.51a095d91ef10a419c54.js></script><script type=text/javascript src=../js/vendor.c0a51289c329e351bfd3.js></script><script type=text/javascript src=../js/app.d968461b833e2c5c73de.js></script></body></html>
